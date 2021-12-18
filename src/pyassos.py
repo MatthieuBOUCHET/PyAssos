@@ -58,6 +58,31 @@ def recherche_par_nom(nom_cherche: str) -> list or None:
 
 class Association:
     def __init__(self, id_rna=None, num_siret=None, paramsAPI=None):
+        """
+        Constructeur de la classe Association.
+        Définit les paramètres à None par défaut.
+
+        Si un identifiant RNA ou un numéro SIRET est fournie, alors une
+        requête est envoyée sur l'API pour obtenir des informations sur
+        l'association en question.
+        Si un dictionnaire Python se basant sur un modèle issu de l'API
+        alors une instance sera créée avec les données fournies.
+        Tout les attributs sont par défaut à None.
+
+        Il ne faut fournir qu'un seul argument lors de la création de
+        l'instance (soit un identifiant RNA, soit un numéro de SIRET ou
+        un dictionnaire Python provenant de l'API RNA).
+        Si plusieurs arguments sont fournis, il n'y en aura qu'un de
+        traité. L'ordre de traitement est hiérarchiquement :
+        - L'identifiant RNA (id_rna)
+        - Le numéro de SIRET (num_siret)
+        - Le dictionnaire provenant de l'API RNA (paramsAPI)
+
+        Args:
+            id_rna: (str), identifiant RNA
+            num_siret: (str) ou (int), numéro de SIRET
+            paramsAPI: (dict), dictionnaire provenant de l'API RNA
+        """
         self.id = None  # Numéro Waldec national unique de l’assoc.(STR)
         self.id_ex = None  # Ancien numéro de l'assoc (STR ou None)
         self.siret = None  # N° SIRET
@@ -116,10 +141,33 @@ class Association:
 
             self.set_attributs_api(paramsAPI)
 
+        elif num_siret is not None:
+            """Requête sur numéro RNA"""
+
+            requete_api = requests.get(ADRESSE_API_INFO_SIRET +
+                                       str(num_siret))
+
+            json_data = requete_api.json()
+
+            try:
+                association = json_data["association"]
+                self.set_attributs_api(association)
+            except KeyError:
+                # Si aucune association trouvée
+                raise ValueError("Le numéro SIRET fournit ne correspond"
+                                 "à aucune association connue")
+
+        else:
+            raise ValueError("Merci de préciser au moins un argument "
+                             "(Identifiant RNA, numéro SIRET ou un"
+                             "dictionnaire Python issue de l'API")
+
     def set_attributs_api(self, donnees: dict) -> None:
         """
         Définit les attributs de l'objet par rapport aux données
-        fournies
+        fournies.
+        Si aucune donnée n'est fournie pour un attribut, alors
+        l'attribut vaut None
 
         Args:
             donnees: (dict), données provenant de l'API ou sous le même
@@ -174,3 +222,4 @@ class Association:
                              "l'API")
 
         return None
+
