@@ -1,4 +1,5 @@
 import requests
+import time
 
 ADRESSE_VERSION_RACINE = "https://entreprise.data.gouv.fr/api/rna/v1/"
 
@@ -36,6 +37,7 @@ def recherche_par_nom(nom_cherche: str) -> list or None:
     if json_data["total_pages"] > 1:
         page = 2
         while page <= json_data["total_pages"] and page <= 60:
+            time.sleep(1)
             requete_api = requests.get(ADRESSE_API_INFO_TEXTE +
                                        str(nom_cherche) +
                                        "?page={}&per_page=100".format(page))
@@ -84,7 +86,8 @@ class Association:
         self.observations = None  # Observations sur l'association
 
         if id_rna is not None:
-            # Requête sur numéro RNA
+            """Requête sur numéro RNA"""
+
             requete_api = requests.get(ADRESSE_API_INFO_RNA +
                                        str(id_rna))
 
@@ -99,6 +102,9 @@ class Association:
                                  "aucune association connue")
 
         elif paramsAPI is not None:
+            """Construction d'une instance à partir d'un dictionnaire
+            obtenue via l'API"""
+
             if type(paramsAPI) is not dict:
                 raise ValueError("Les paramètres de l'association n'est"
                                  "pas un dictionnaire")
