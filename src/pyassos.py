@@ -11,7 +11,9 @@ ADRESSE_API_INFO_SIRET = ADRESSE_VERSION_RACINE + "siret/"
 def recherche_par_nom(nom_cherche: str) -> list or None:
     """Recherche via l'API des associations correspondantes au nom
     recherchées.
-
+    Lors de requêtes mutliples, dans le cas de plusieurs pages de
+    résultats, une requête est envoyée toutes les une seconde au maximum
+    pour respecter les conditions d'utilisations de l'API.
     Renvoie une liste d'associations sous forme d'une liste de
     dictionnaires.
 
@@ -38,6 +40,9 @@ def recherche_par_nom(nom_cherche: str) -> list or None:
         page = 2
         while page <= json_data["total_pages"] and page <= 60:
             time.sleep(1)
+            # Limite de requête sur l'API pour respecter les conditions
+            # de l'API
+
             requete_api = requests.get(ADRESSE_API_INFO_TEXTE +
                                        str(nom_cherche) +
                                        "?page={}&per_page=100".format(page))
