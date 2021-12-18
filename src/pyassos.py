@@ -28,7 +28,6 @@ def recherche_par_nom(nom_cherche: str) -> list or None:
 
     try:
         for association in json_data["association"]:
-            print(association)
             listeAssociation.append(Association(paramsAPI=association))
 
     except KeyError:
@@ -84,7 +83,22 @@ class Association:
         self.derniere_maj = None  # Date de MAJ de article
         self.observations = None  # Observations sur l'association
 
-        if paramsAPI is not None:
+        if id_rna is not None:
+            # Requête sur numéro RNA
+            requete_api = requests.get(ADRESSE_API_INFO_RNA +
+                                       str(id_rna))
+
+            json_data = requete_api.json()
+
+            try:
+                association = json_data["association"]
+                self.set_attributs_api(association)
+            except KeyError:
+                # Si aucune association trouvée
+                raise ValueError("Le numéro RNA fournit ne correspond à"
+                                 "aucune association connue")
+
+        elif paramsAPI is not None:
             if type(paramsAPI) is not dict:
                 raise ValueError("Les paramètres de l'association n'est"
                                  "pas un dictionnaire")
@@ -114,7 +128,7 @@ class Association:
             self.date_creation = donnees["date_creation"]
             self.date_derniere_declaration = donnees["date_derniere_"
                                                      "declaration"]
-            self.date_publi_creation = donnees["date_publication_" \
+            self.date_publi_creation = donnees["date_publication_"
                                                "creation"]
 
             self.date_publi_dissolution = donnees["date_declaration_"
