@@ -91,7 +91,19 @@ class Association:
 
             self.set_attributs_api(paramsAPI)
 
-    def set_attributs_api(self, donnees: dict):
+    def set_attributs_api(self, donnees: dict) -> None:
+        """
+        Définit les attributs de l'objet par rapport aux données
+        fournies
+
+        Args:
+            donnees: (dict), données provenant de l'API ou sous le même
+        format
+
+        Returns:
+            None
+
+        """
         try:
             self.id = donnees["id_association"]
             self.id_ex = donnees["id_ex_association"]
@@ -136,9 +148,4 @@ class Association:
             raise ValueError("Les données ne semblent pas provenir de"
                              "l'API")
 
-
-
-
-
-
-print("Uh")
+        return None
