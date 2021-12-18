@@ -222,4 +222,3 @@ class Association:
                              "l'API")
 
         return None
-
