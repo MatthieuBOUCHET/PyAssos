@@ -17,19 +17,22 @@ def recherche_par_nom(nom_cherche: str) -> list or None:
     Args:
         nom_cherche -- (string), nom de l'association cherchée
     """
-    try:
-        requete_api = requests.get(ADRESSE_API_INFO_TEXTE +
-                                   str(nom_cherche) +
-                                   "?per_page=100")
 
-    except:
-        return None
+    requete_api = requests.get(ADRESSE_API_INFO_TEXTE +
+                               str(nom_cherche) +
+                               "?per_page=100")
 
     json_data = requete_api.json()
+
     listeAssociation = []
 
-    for association in json_data["association"]:
-        listeAssociation.append(association)
+    try:
+        for association in json_data["association"]:
+            print(association)
+            listeAssociation.append(Association(paramsAPI=association))
+
+    except KeyError:
+        raise ValueError("Aucun résultat n'a été trouvé par l'API.")
 
     if json_data["total_pages"] > 1:
         page = 2
@@ -41,13 +44,14 @@ def recherche_par_nom(nom_cherche: str) -> list or None:
             json_data = requete_api.json()
 
             for association in json_data["association"]:
-                listeAssociation.append(association)
+                listeAssociation.append(
+                    Association(paramsAPI=association))
 
     return listeAssociation
 
 
 class Association:
-    def __init__(self, id_rna=None, num_siret=None, params=None):
+    def __init__(self, id_rna=None, num_siret=None, paramsAPI=None):
         self.id = None  # Numéro Waldec national unique de l’assoc.(STR)
         self.id_ex = None  # Ancien numéro de l'assoc (STR ou None)
         self.siret = None  # N° SIRET
@@ -80,49 +84,61 @@ class Association:
         self.derniere_maj = None  # Date de MAJ de article
         self.observations = None  # Observations sur l'association
 
-        if params is not None:
-            if type(params) is not dict:
+        if paramsAPI is not None:
+            if type(paramsAPI) is not dict:
                 raise ValueError("Les paramètres de l'association n'est"
                                  "pas un dictionnaire")
 
+            self.set_attributs_api(paramsAPI)
+
     def set_attributs_api(self, donnees: dict):
-        self.id = donnees["id_association"]
-        self.id_ex = donnees["id_ex_association"]
-        self.siret = donnees["siret"]
-        self.num_utilite_publique = donnees["numero_reconnaissance"
-                                            "_utitlite_publique"]
-        self.code_gestion = donnees["code_gestion"]
-        self.date_creation = donnees["date_creation"]
-        self.date_derniere_declaration = donnees["date_derniere_"
-                                                 "declaration"]
-        self.date_publi_creation = donnees["date_publication_creation"]
-        self.date_publi_dissolution = donnees["date_declaration_"
-                                              "dissolution"]
-        self.nature = donnees["nature"]
-        self.groupement = donnees["groupement"]
-        self.titre = donnees["titre"]
-        self.titre_court = donnees["titre_court"]
-        self.objet_social = donnees["objet"]
-        self.code_objet_social_1 = donnees["objet_social1"]
-        self.code_objet_social_2 = donnees["objet_social2"]
-        self.code_postal = donnees["adresse_code_postal"]
-        self.code_insee = donnees["adresse_code_insee"]
-        self.commune = donnees["adresse_libelle_commune"]
-        self.pays = donnees["adresse_gestion_pays"]
-        self.adresse = "{}, {} {} {} {}".format(
-            donnees["adresse_gestion_geo"],
-            donnees["adresse_gestion_libelle_voie"],
-            self.code_postal,
-            self.commune,
-            self.pays
-        )
-        self.telephone = donnees["telephone"]
-        self.email = donnees["email"]
-        self.site_web = donnees["site_web"]
-        self.observations = donnees["observation"]
-        self.activite = donnees["position_acitivite"]
-        self.derniere_maj = donnees["derniere_maj"]
+        try:
+            self.id = donnees["id_association"]
+            self.id_ex = donnees["id_ex_association"]
+            self.siret = donnees["siret"]
+            self.num_utilite_publique = donnees["numero_reconnaissance_"
+                                                "utilite_publique"]
+            self.code_gestion = donnees["code_gestion"]
+            self.date_creation = donnees["date_creation"]
+            self.date_derniere_declaration = donnees["date_derniere_"
+                                                     "declaration"]
+            self.date_publi_creation = donnees["date_publication_" \
+                                               "creation"]
+
+            self.date_publi_dissolution = donnees["date_declaration_"
+                                                  "dissolution"]
+            self.nature = donnees["nature"]
+            self.groupement = donnees["groupement"]
+            self.titre = donnees["titre"]
+            self.titre_court = donnees["titre_court"]
+            self.objet_social = donnees["objet"]
+            self.code_objet_social_1 = donnees["objet_social1"]
+            self.code_objet_social_2 = donnees["objet_social2"]
+            self.code_postal = donnees["adresse_code_postal"]
+            self.code_insee = donnees["adresse_code_insee"]
+            self.commune = donnees["adresse_libelle_commune"]
+            self.pays = donnees["adresse_gestion_pays"]
+            self.adresse = "{}, {} {} {} {}".format(
+                donnees["adresse_gestion_geo"],
+                donnees["adresse_gestion_libelle_voie"],
+                self.code_postal,
+                self.commune,
+                self.pays
+            )
+            self.telephone = donnees["telephone"]
+            self.email = donnees["email"]
+            self.site_web = donnees["site_web"]
+            self.observations = donnees["observation"]
+            self.activite = donnees["position_activite"]
+            self.derniere_maj = donnees["derniere_maj"]
+
+        except KeyError:
+            raise ValueError("Les données ne semblent pas provenir de"
+                             "l'API")
 
 
 
 
+
+
+print("Uh")
