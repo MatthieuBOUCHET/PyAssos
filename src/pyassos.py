@@ -142,7 +142,7 @@ class Association:
             self.set_attributs_api(paramsAPI)
 
         elif num_siret is not None:
-            """Requête sur numéro RNA"""
+            """Requête sur numéro SIRET"""
 
             requete_api = requests.get(ADRESSE_API_INFO_SIRET +
                                        str(num_siret))
